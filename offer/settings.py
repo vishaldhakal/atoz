@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-4y1st5e4q*fd)z540e5&isj6%=u*ovt7!s2ufn^4_v4cww3ypt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','luckydrawvivo.herokuapp.com','localhost','seahorse-app-snfj4.ondigitalocean.app','vivodashain.com']
-
+ALLOWED_HOSTS = ['127.0.0.1', 'luckydrawvivo.herokuapp.com', 'localhost',
+                 'sea-lion-app-jjx23.ondigitalocean.app', 'vivodashain.com', 'atoz.vivodashain.com']
 
 
 # Application definition
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'offer.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
