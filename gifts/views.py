@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import Customer, Sales, Offers, Gift,FixOffer
 from datetime import date
 import csv
+import json
 
 
 def index(request):
@@ -136,7 +137,7 @@ def registerCustomer(request):
         myoff = False
 
         for off in dsd:
-            if (contact_number in off.phone_number) and ((customer_name.lower())==off.customer_name.lower()):
+            if (contact_number in off.phone_number):
                 if(off.quantity > 0):
                     customer.gift = off.gift
                     customer.save()
