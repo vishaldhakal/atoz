@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse, redirect
 from rest_framework.response import Response
-from .models import Customer, Sales, Offers, Gift
+from .models import Customer, Sales, Offers, Gift,FixOffer
 from datetime import date
 import csv
 
@@ -105,10 +105,9 @@ def registerCustomer(request):
         product_name = request.POST["product_name"]
         how_know_about_campaign = request.POST["how_know_about_campaign"]
 
-        custt = Customer.objects.filter(customer_name=customer_name, phone_number=contact_number, shop_name=shop_name, product_name=product_name,
-                                        sale_status="SOLD", how_know_about_campaign=how_know_about_campaign)
+        custt = Customer.objects.filter(customer_name=customer_name).filter(phone_number=contact_number).filter(shop_name=shop_name).filter(product_name=product_name).filter(how_know_about_campaign=how_know_about_campaign)
         if custt:
-            redirect('index')
+            return redirect('index')
 
         customer = Customer.objects.create(customer_name=customer_name, phone_number=contact_number, shop_name=shop_name, product_name=product_name,
                                            sale_status="SOLD", how_know_about_campaign=how_know_about_campaign)
@@ -132,27 +131,43 @@ def registerCustomer(request):
         sale_today.sales_count = get_sale_count+1
         sale_today.save()
 
-        for offer in offers_all:
-            if offer.type_of_offer == "After every certain sale":
-                if (((get_sale_count+1) % offer.offer_condtion_value == 0)) and (offer.quantity > 0):
-                    """ Grant Gift """
-                    qty = offer.quantity
-                    customer.gift = offer.gift
+        dsd = FixOffer.objects.all()
+
+        myoff = False
+
+        for off in dsd:
+            if (contact_number in off.phone_number) and ((customer_name.lower())==off.customer_name.lower()):
+                if(off.quantity > 0):
+                    customer.gift = off.gift
                     customer.save()
-                    offer.quantity = qty-1
-                    offer.save()
                     giftassign = True
+                    myoff = True
+                    off.quantity = 0
+                    off.save()
                     break
-            else:
-                if ((get_sale_count+1) == offer.offer_condtion_value) and (offer.quantity > 0):
-                    """ Grant Gift """
-                    qty = offer.quantity
-                    customer.gift = offer.gift
-                    customer.save()
-                    offer.quantity = qty-1
-                    offer.save()
-                    giftassign = True
-                    break
+        
+        if myoff==False:
+            for offer in offers_all:
+                if offer.type_of_offer == "After every certain sale":
+                    if (((get_sale_count+1) % offer.offer_condtion_value == 0)) and (offer.quantity > 0):
+                        """ Grant Gift """
+                        qty = offer.quantity
+                        customer.gift = offer.gift
+                        customer.save()
+                        offer.quantity = qty-1
+                        offer.save()
+                        giftassign = True
+                        break
+                else:
+                    if ((get_sale_count+1) == offer.offer_condtion_value) and (offer.quantity > 0):
+                        """ Grant Gift """
+                        qty = offer.quantity
+                        customer.gift = offer.gift
+                        customer.save()
+                        offer.quantity = qty-1
+                        offer.save()
+                        giftassign = True
+                        break
         return render(request, "output.html", {"customer": customer, "giftassigned": giftassign})
     else:
         return redirect('indexWithError')

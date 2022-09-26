@@ -60,3 +60,9 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.customer_name
+
+class FixOffer(models.Model):
+    phone_number = models.CharField(max_length=400)
+    customer_name = models.CharField(max_length=400)
+    gift = models.ForeignKey(Gift, on_delete=models.CASCADE, null=True)
+    quantity = models.IntegerField()
