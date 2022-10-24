@@ -1,10 +1,11 @@
+from http.client import FOUND
 from django.shortcuts import render, HttpResponse, redirect
 from rest_framework.response import Response
 from .models import Customer, Sales, Offers, Gift,FixOffer
 from datetime import date
 import csv
 import json
-
+import random
 
 def index(request):
     return render(request, "index.html")
@@ -133,7 +134,6 @@ def registerCustomer(request):
         sale_today.save()
 
         dsd = FixOffer.objects.all()
-
         myoff = False
 
         for off in dsd:
@@ -147,28 +147,38 @@ def registerCustomer(request):
                     off.save()
                     break
         
+        found = False
+        
         if myoff==False:
-            for offer in offers_all:
-                if offer.type_of_offer == "After every certain sale":
-                    if (((get_sale_count+1) % offer.offer_condtion_value == 0)) and (offer.quantity > 0):
-                        """ Grant Gift """
-                        qty = offer.quantity
-                        customer.gift = offer.gift
-                        customer.save()
-                        offer.quantity = qty-1
-                        offer.save()
-                        giftassign = True
-                        break
-                else:
-                    if ((get_sale_count+1) == offer.offer_condtion_value) and (offer.quantity > 0):
-                        """ Grant Gift """
-                        qty = offer.quantity
-                        customer.gift = offer.gift
-                        customer.save()
-                        offer.quantity = qty-1
-                        offer.save()
-                        giftassign = True
-                        break
+            while found==False:
+                offidlist = []
+                for offer in offers_all:
+                    offidlist.append(offer.id)
+                rand_idx = random.choice(offidlist)
+                getofff = Offers.objects.get(id=rand_idx)
+                if getofff.quantity > 0:
+                    if getofff.type_of_offer == "After every certain sale":
+                        if (getofff.quantity > 0):
+                            """ Grant Gift """
+                            qty = getofff.quantity
+                            customer.gift = getofff.gift
+                            customer.save()
+                            getofff.quantity = qty-1
+                            getofff.save()
+                            giftassign = True
+                            found = True
+                            break
+                    else:
+                        if (getofff.quantity > 0):
+                            """ Grant Gift """
+                            qty = getofff.quantity
+                            customer.gift = getofff.gift
+                            customer.save()
+                            getofff.quantity = qty-1
+                            getofff.save()
+                            giftassign = True
+                            found = True
+                            break
         return render(request, "output.html", {"customer": customer, "giftassigned": giftassign})
     else:
         return redirect('indexWithError')
